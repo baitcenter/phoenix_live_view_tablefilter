@@ -20,6 +20,7 @@ defmodule DemoWeb.Router do
 
     get "/", PageController, :index
 
+    live "/tablefilter/show_cols", TableFilter.ShowCols
     live "/thermostat", ThermostatLive
     get "/snake", PageController, :snake
     live "/search", SearchLive
@@ -34,6 +35,7 @@ defmodule DemoWeb.Router do
     live "/users/new", UserLive.New
     live "/users/:id", UserLive.Show
     live "/users/:id/edit", UserLive.Edit
+
 
     resources "/plain/users", UserController
   end
