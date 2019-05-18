@@ -1,4 +1,6 @@
-# Demo
+# Demo with a Table Filter
+
+* Explanations on https://medium.com/@imartinat/table-filter-with-phoenix-liveview-cb30508e9fc0
 
 To start your Phoenix server:
 
