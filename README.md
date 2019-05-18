@@ -1,6 +1,7 @@
 # Demo with a Table Filter
 
 * Explanations on https://medium.com/@imartinat/table-filter-with-phoenix-liveview-cb30508e9fc0
+* Test Data for the table in a CSV file in the data folder
 
 To start your Phoenix server:
 
