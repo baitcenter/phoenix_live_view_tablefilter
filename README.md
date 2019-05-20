@@ -4,8 +4,8 @@
 
 - [X] Select Columns to be visible on the table (Part 1)
 - [X] Filter Columns with dropdown list (Part 2 in the next days)
-- [] Search Columns with >,>=,<,<=  for numbers and query for strings
-- [] Sort by column
+- [ ] Search Columns with >,>=,<,<=  for numbers and query for strings
+- [ ] Sort by column
 
 
 To start your Phoenix server:
