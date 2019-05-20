@@ -70,11 +70,7 @@ defmodule DemoWeb.TableFilter.FilterCols do
   def selected?(filter,key,type) do
     case (Map.has_key?(filter, key)) do
       true -> case filter[key]==type do
-        true ->
-          IO.inspect(filter)
-          IO.inspect(key)
-          IO.inspect(type)
-          "selected"
+        true -> "selected"
         false -> ""
       end
       false -> ""
@@ -98,19 +94,34 @@ defmodule DemoWeb.TableFilter.FilterCols do
     |> Enum.into(%{})
   end
 
-  def mount(_, socket) do
-    rows = Companies.list_customers()
+  def get_filter_list do
+    ["country","state","city"]
+  end
 
-    cols = [
-      {"id","Id"}, {"customerName","Customer"} , {"contactFirstName","First Name"} , {"contactLastName","Last Name"},
+  def get_cols do
+    #should get the cols from a database or a json config file
+    [ {"id","Id"}, {"customerName","Customer"} , {"contactFirstName","First Name"} , {"contactLastName","Last Name"},
       {"phone" , "Phone"} , {"addressLine1", "Address Line 1"} , {"addressLine2", "Address Line 2"} ,
       {"city","City"}, {"state", "State"} , {"postalCode","Postal Code"} , {"country" , "Country"} ,
-      {"creditLimit", "Credit Limit"}
-    ]
+      {"creditLimit", "Credit Limit"} ]
+  end
+
+  def get_rows do
+    Companies.list_customers()
+  end
+
+  def get_filter_rows(filter) do
+    Companies.query_table(filter)
+  end
+
+  def mount(_, socket) do
+    rows = get_rows()
+
+    cols = get_cols()
     show_cols = Enum.map(cols, fn {col,_} -> {col,"true"} end) |> Enum.into(%{})
 
     #filter_list : List of columns to filter with dropdown list
-    filter_list = ["country","state","city"]
+    filter_list = get_filter_list()
 
     #select : Map containting for each col of filter_list the list of values from rows
     select = select_list(filter_list,rows)
@@ -120,7 +131,7 @@ defmodule DemoWeb.TableFilter.FilterCols do
     filter = Enum.map(filter_list, fn col -> {col,"All"} end) |> Enum.into(%{})
 
     {:ok, assign(socket, rows: rows, show_cols: show_cols, cols: cols,
-    filter_list: filter_list, select: select, filter: filter) }
+    filter_list: filter_list, select: select, filter: filter ) }
   end
 
   def handle_event("show_cols", checked_cols , socket) do
@@ -130,7 +141,7 @@ defmodule DemoWeb.TableFilter.FilterCols do
 
   #reset filters : each col filter is set to "All"
   def handle_event("reset", _, socket) do
-    rows = Companies.list_customers()
+    rows = get_rows()
     filter_list = socket.assigns.filter_list
     select = select_list(filter_list,rows)
     filter =
@@ -151,7 +162,7 @@ defmodule DemoWeb.TableFilter.FilterCols do
         _   -> socket.assigns.filter |> Map.merge(filter)
     end
 
-    filter_rows = Companies.query_table(new_filter)
+    filter_rows = get_filter_rows(new_filter)
     select =
       socket.assigns.filter_list
       |> select_list(filter_rows)
