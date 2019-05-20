@@ -110,7 +110,6 @@ defmodule DemoWeb.TableFilter.FilterCols do
     show_cols = Enum.map(cols, fn {col,_} -> {col,"true"} end) |> Enum.into(%{})
 
     #filter_list : List of columns to filter with dropdown list
-    #filter_list = [:country,:state,:city]
     filter_list = ["country","state","city"]
 
     #select : Map containting for each col of filter_list the list of values from rows
@@ -118,7 +117,6 @@ defmodule DemoWeb.TableFilter.FilterCols do
     IO.inspect(select)
 
     #filter is set to All for each column
-    #filter = Enum.map(filter_list, fn col -> {Atom.to_string(col),"All"} end) |> Enum.into(%{})
     filter = Enum.map(filter_list, fn col -> {col,"All"} end) |> Enum.into(%{})
 
     {:ok, assign(socket, rows: rows, show_cols: show_cols, cols: cols,
@@ -130,6 +128,7 @@ defmodule DemoWeb.TableFilter.FilterCols do
     {:noreply, assign(socket, show_cols: checked_cols)}
   end
 
+  #reset filters : each col filter is set to "All"
   def handle_event("reset", _, socket) do
     rows = Companies.list_customers()
     filter_list = socket.assigns.filter_list
@@ -141,17 +140,17 @@ defmodule DemoWeb.TableFilter.FilterCols do
     {:noreply, assign(socket, rows: rows, select: select, filter: filter)}
   end
 
+  #filter : add new filter to the socket
+  #unless the filter is All, in this case previous filter for this column is deleted
   def handle_event("filter", filter , socket) do
     IO.inspect(filter)
     key = hd(Map.keys(filter))
     val = filter[key]
-    f = case val do
+    new_filter = case val do
       "All" -> socket.assigns.filter |> Map.delete(key)
         _   -> socket.assigns.filter |> Map.merge(filter)
     end
 
-    new_filter = Enum.filter(f,fn {_col,val} -> val !="All" end) |> Enum.into(%{})
-    IO.inspect(new_filter)
     filter_rows = Companies.query_table(new_filter)
     select =
       socket.assigns.filter_list
