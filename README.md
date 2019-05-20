@@ -1,7 +1,12 @@
 # Demo with a Table Filter
 
 * Explanations on https://medium.com/@imartinat/table-filter-with-phoenix-liveview-cb30508e9fc0
-* Test Data for the table in a CSV file in the data folder
+
+- [X] Select Columns to be visible on the table (Part 1)
+- [X] Filter Columns with dropdown list (Part 2 in the next days)
+- [] Search Columns with >,>=,<,<=  for numbers and query for strings
+- [] Sort by column
+
 
 To start your Phoenix server:
 
@@ -9,6 +14,7 @@ To start your Phoenix server:
   * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
   * Install Node.js dependencies with `cd assets && npm install && cd ..`
   * Start Phoenix endpoint with `mix phx.server`
+  * Test Data for the table in a CSV file in the data folder to import in the database
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 

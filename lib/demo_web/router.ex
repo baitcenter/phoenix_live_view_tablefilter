@@ -21,6 +21,7 @@ defmodule DemoWeb.Router do
     get "/", PageController, :index
 
     live "/tablefilter/show_cols", TableFilter.ShowCols
+    live "/tablefilter/filter_cols", TableFilter.FilterCols
     live "/thermostat", ThermostatLive
     get "/snake", PageController, :snake
     live "/search", SearchLive
