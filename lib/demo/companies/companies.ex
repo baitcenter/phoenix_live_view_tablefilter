@@ -39,20 +39,15 @@ defmodule Demo.Companies do
     query
   end
 
-  defp compose_query({"search", name}, query) do
-    string = "%" <> name <> "%"
-    where(query, [d], like(d.user_name, ^string))
-  end
-
   defp compose_query( { k, {op , val} } = _filter ,query) do
     case op do
       "=" ->
         string = "%" <> val <> "%"
-        where(query, [d], like( field(d,^String.to_atom(k)) , ^string))
-      ">" -> where(query, [d], field(d,^String.to_atom(k)) > ^String.slice(val, 1..-1))
-      "<" -> where(query, [d], field(d,^String.to_atom(k)) < ^String.slice(val, 1..-1))
-      ">=" -> where(query, [d], field(d,^String.to_atom(k)) >= ^String.slice(val, 2..-1))
-      "<=" -> where(query, [d], field(d,^String.to_atom(k)) <= ^String.slice(val, 2..-1))
+        where(query, [c], like( field(c,^String.to_atom(k)) , ^string))
+      ">" -> where(query, [c], field(c,^String.to_atom(k)) > ^String.slice(val, 1..-1))
+      "<" -> where(query, [c], field(c,^String.to_atom(k)) < ^String.slice(val, 1..-1))
+      ">=" -> where(query, [c], field(c,^String.to_atom(k)) >= ^String.slice(val, 2..-1))
+      "<=" -> where(query, [c], field(c,^String.to_atom(k)) <= ^String.slice(val, 2..-1))
     end
   end
 
