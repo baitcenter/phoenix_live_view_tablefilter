@@ -21,7 +21,8 @@ To use the data from your tables:
 
   * Add in your context file containing the query functions the following functions from lib/demo/companies/companies.ex:
     * base_query : to be updated with your own base query
-    * query_table and compose_query : code from https://elixirschool.com/blog/ecto-query-composition/
+    * query_table and compose_query 
+      * reused code from https://elixirschool.com/blog/ecto-query-composition/
   * Update the functions in lib/demo_web/live/search_filter.ex:
     * get_filter_list, get_search_list, get_cols
     * get_rows, get_filter_rows
