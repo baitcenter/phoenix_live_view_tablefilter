@@ -22,6 +22,7 @@ defmodule DemoWeb.Router do
 
     live "/tablefilter/show_cols", TableFilter.ShowCols
     live "/tablefilter/filter_cols", TableFilter.FilterCols
+    live "/tablefilter/search_filter_cols", TableFilter.SearchFilterCols
     live "/thermostat", ThermostatLive
     get "/snake", PageController, :snake
     live "/search", SearchLive
