@@ -3,8 +3,8 @@
 * Explanations on https://medium.com/@imartinat/table-filter-with-phoenix-liveview-cb30508e9fc0
 
 - [X] Select Columns to be visible on the table (Part 1)
-- [X] Filter Columns with dropdown list (Part 2 in the next days)
-- [X] Search Columns with >,>=,<,<=  for numbers and query for strings
+- [X] Filter Columns with dropdown list (Part 2)
+- [X] Search Columns with >,>=,<,<=  for numbers and query for strings (Part 3 in the next days)
 - [ ] Sort by column
 
 
