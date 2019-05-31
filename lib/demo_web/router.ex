@@ -20,6 +20,7 @@ defmodule DemoWeb.Router do
 
     get "/", PageController, :index
 
+    live "/tablefilter/filtrex", TableFilter.Filtrex
     live "/tablefilter/show_cols", TableFilter.ShowCols
     live "/tablefilter/filter_cols", TableFilter.FilterCols
     live "/tablefilter/search_filter_cols", TableFilter.SearchFilterCols

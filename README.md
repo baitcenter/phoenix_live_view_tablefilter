@@ -10,6 +10,7 @@
 
 To start your Phoenix server:
 
+  * Add {:filtrex, "~> 0.4.3"} in your mix.exs file in the deps
   * Install dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
   * Install Node.js dependencies with `cd assets && npm install && cd ..`
@@ -17,13 +18,12 @@ To start your Phoenix server:
   * Start Phoenix endpoint with `mix phx.server`
   
 
-To use the data from your tables:
+To use your data from your tables:
 
-  * Add in your context file containing the query functions the following functions from lib/demo/companies/companies.ex:
-    * base_query : to be updated with your own base query
-    * query_table and compose_query 
-      * reused code from https://elixirschool.com/blog/ecto-query-composition/
-  * Update the functions in lib/demo_web/live/search_filter.ex:
+  * Add in your context file containing the following functions from lib/demo/companies/companies.ex:
+    * filter_config
+    * filter_yourtable (equivalent of filter_customers)
+  * Update the functions in lib/demo_web/live/filtrex.ex:
     * get_filter_list, get_search_list, get_cols
     * get_rows, get_filter_rows
 
