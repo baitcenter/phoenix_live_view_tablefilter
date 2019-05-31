@@ -22,8 +22,8 @@ To start your Phoenix server:
 To use your data from your tables:
 
   * Add in your context file the following functions from lib/demo/companies/companies.ex:
-    * filter_config
-    * filter_yourtable (equivalent of filter_customers)
+    * filter_config (More information for this function on [Filtrex])
+    * filter_yourtable (from filter_customers)
   * Update the functions in lib/demo_web/live/filtrex.ex:
     * get_filter_list, get_search_list, get_cols
     * get_rows, get_filter_rows
