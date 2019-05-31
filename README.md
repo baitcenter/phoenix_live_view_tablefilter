@@ -11,7 +11,7 @@
 To start your Phoenix server:
 
   * Add {:filtrex, "~> 0.4.3"} in your mix.exs file in the deps
-    * More information on Filtrex [here](https://github.com/rcdilorenzo/filtrex)
+    * More information on [Filtrex](https://github.com/rcdilorenzo/filtrex)
   * Install dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
   * Install Node.js dependencies with `cd assets && npm install && cd ..`
