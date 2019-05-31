@@ -1,4 +1,4 @@
-defmodule DemoWeb.TableFilter.SearchFilterCols do
+defmodule DemoWeb.TableFilter.Filtrex do
   use Phoenix.LiveView
 
   alias Demo.Companies
@@ -15,6 +15,7 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
 
     <center><button phx-click="reset">RESET FILTERS</button></center>
 
+    <form phx-change="table">
   <table>
     <thead>
       <tr>
@@ -32,18 +33,18 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
         <%= if (String.to_existing_atom(@show_cols[col])) do %>
           <td style="min-width:70px">
             <%= if (Enum.member?(@filter_list,col)) do %>
-              <form phx-change="filter">
+            <%# <form phx-change="filter"> %>
                 <SELECT name="<%= col %>">
                 <%= for value <- Map.get(@select,col) do %>
                   <OPTION value="<%= value %>" <%= (selected?(@filter,col,value)) %> > <%= value %>
                 <% end %>
                 </SELECT>
-              </form>
+                <%# </form> %>
             <% end %>
             <%= if (Enum.member?(@search_list,col)) do %>
-              <form phx-change="search">
+            <%#  <form phx-change="search"> %>
               <input type="text" name="<%= col %>" value="<%= query(@filter,col) %>">
-              </form>
+              <%#  </form> %>
             <% end %>
           </td>
         <% end %>
@@ -62,6 +63,7 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
     </tbody>
 
   </table>
+  </form>
     """
   end
 
@@ -72,25 +74,33 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
     end
   end
 
-  def selected?(filter,key,type) do
+  def selected?(filter,key,val) do
+    #IO.inspect(filter)
+    #IO.inspect(key)
+    #IO.inspect(val)
+    key = key <> "_equals"
     case (Map.has_key?(filter, key)) do
-      true -> case filter[key]==type do
+      true -> case filter[key]==val do
         true -> "selected"
         false -> ""
       end
-      false -> ""
+      false -> case val=="All" do
+        true -> "selected"
+        false -> ""
+      end
       end
     end
 
-  #get the value in the filter map for the key in param or return ""
-  def query(filter,key) do
-      case (Map.has_key?(filter, key)) do
-        true -> case filter[key] do
-          {_,v} -> v
-          _ -> filter[key]
+    #get the value in the filter map for the key in param or return ""
+    def query(filter,key) do
+      cond do
+        (Map.has_key?(filter, key)) ->
+          case filter[key] do
+            {_,v} -> v
+            _ -> filter[key]
           end
-        false -> ""
-        end
+        true -> ""
+      end
     end
 
   #get the list of values from rows for the column filter
@@ -111,19 +121,18 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
   end
 
   def get_filter_list do
-    ["country","state","city"]
+    ~w(country state city)
   end
 
   def get_search_list do
-    ["id","customerName","phone","creditLimit","postalCode","contactFirstName","contactLastName"]
+    ~w(customerName phone creditLimit postalCode contactFirstName contactLastName)
   end
 
   def get_cols do
     #should get the cols from a database or a json config file
     [ {"id","Id"}, {"customerName","Customer"} , {"contactFirstName","First Name"} , {"contactLastName","Last Name"},
-      {"phone" , "Phone"} , {"addressLine1", "Address Line 1"} , {"addressLine2", "Address Line 2"} ,
-      {"city","City"}, {"state", "State"} , {"postalCode","Postal Code"} , {"country" , "Country"} ,
-      {"creditLimit", "Credit Limit"} ]
+      {"phone" , "Phone"} ,  {"city","City"}, {"state", "State"} ,
+       {"postalCode","Postal Code"} , {"country" , "Country"} , {"creditLimit", "Credit Limit"} ]
   end
 
   def get_rows do
@@ -131,7 +140,8 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
   end
 
   def get_filter_rows(filter) do
-    Companies.query_table(filter)
+    #Companies.query_table(filter)
+    Companies.filter_customers(filter)
   end
 
   def mount(_, socket) do
@@ -150,11 +160,8 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
     select = select_list(filter_list,rows)
     IO.inspect(select)
 
-    #filter is set to All for each column
-    filter = Enum.map(filter_list, fn col -> {col,"All"} end) |> Enum.into(%{})
-
     {:ok, assign(socket, rows: rows, show_cols: show_cols, cols: cols,
-    filter_list: filter_list, select: select, search_list: search_list, filter: filter ) }
+    filter_list: filter_list, select: select, search_list: search_list, filter: %{} ) }
   end
 
   def handle_event("show_cols", checked_cols , socket) do
@@ -167,60 +174,60 @@ defmodule DemoWeb.TableFilter.SearchFilterCols do
     rows = get_rows()
     filter_list = socket.assigns.filter_list
     select = select_list(filter_list,rows)
-    filter =
-      Enum.map(filter_list, fn col -> {col,"All"} end)
-      |> Enum.into(%{})
+    #filter =
+    #  Enum.map(filter_list, fn col -> {col,"All"} end)
+    #  |> Enum.into(%{})
 
-    {:noreply, assign(socket, rows: rows, select: select, filter: filter)}
+    {:noreply, assign(socket, rows: rows, select: select, filter: %{})}
   end
 
-  #filter : add new filter to the socket
-  #unless the filter is All, in this case previous filter for this column is deleted
-  def handle_event("filter", filter , socket) do
+
+  #new version : filter is a map of all the values of the form instead of the last one.
+  #needs to go through all the values and if a value == "All" delete key
+  #only handle_event("form") instead of filter and search.
+  #filter -> equals
+  #search -> contains , = , >,  ....
+  def handle_event(_, filter , socket) do
     IO.inspect(filter)
-    key = hd(Map.keys(filter))
-    val = filter[key]
-    new_filter = case val do
-      "All" -> socket.assigns.filter |> Map.delete(key)
-        _   -> socket.assigns.filter |> Map.merge(filter)
+    new_filter =
+      Enum.map(filter,&rename_key/1)
+      |> Enum.reject(fn {_,val} -> val=="All" || val=="" end )
+      |> Enum.into(%{})
+    IO.inspect(new_filter)
+    filtered_rows = get_filter_rows(new_filter)
+    case filtered_rows do
+      [] -> {:noreply, socket}
+      _ ->  select = get_filter_list() |> select_list(filtered_rows)
+            {:noreply, assign(socket, rows: filtered_rows, filter: new_filter, select: select) }
     end
-
-    filter_rows = get_filter_rows(new_filter)
-    select =
-      socket.assigns.filter_list
-      |> select_list(filter_rows)
-      {:noreply, assign(socket, rows: filter_rows, filter: new_filter, select: select)}
   end
 
-#search value in a column
-def handle_event("search", search , socket) do
-  IO.inspect(search)
-  key = hd(Map.keys(search))
-  val = search[key]
+
+  #rename the key to be used by filtrex, adds _equals, _contains ... to the column name
+  #delete >,<,= on the value
+def rename_key({key,val}) do
   char2 = String.at(val,1)
 
-  op = case String.at(val,0) do
-    ">" -> ">" <> equal?(char2)
-    "<" -> "<" <> equal?(char2)
-    _ -> "="
+  IO.inspect(key)
+  new_key = case String.at(val,0) do
+  ">" -> key <> "_greater_than" <> equal?(char2)
+  "<" -> key <> "_less_than" <> equal?(char2)
+  "=" -> key <> "_equals"
+  _   -> cond do
+    Enum.member?(get_filter_list(), key) -> key <> "_equals"
+    true -> key <> "_contains"
+    end
   end
 
-  new_filter = cond do
-    String.length(val) > String.length(op) ->
-      socket.assigns.filter
-      |> Map.put(key, {op, val})
-    true ->
-      socket.assigns.filter
-      |> Map.delete(key)
-  end
-  IO.inspect(new_filter)
-  filter_rows = get_filter_rows(new_filter)
-  {:noreply, assign(socket, rows: filter_rows, filter: new_filter )}
+  IO.inspect(new_key)
+  new_val = String.replace(val, ">", "") |> String.replace("<", "") |> String.replace( "=", "")
+  {new_key, new_val}
 end
+
 
 defp equal?(char) do
   case char do
-    "=" -> "="
+    "=" -> "_or"
      _ -> ""
   end
 end

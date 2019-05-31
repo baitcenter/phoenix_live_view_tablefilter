@@ -36,7 +36,7 @@ defmodule DemoWeb.TableFilter.ShowCols do
       <% end %>
     </tbody>
 
-  </table>
+    </table>
     """
   end
 

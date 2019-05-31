@@ -4,6 +4,7 @@ defmodule Demo.Companies do
   """
 
   import Ecto.Query, warn: false
+  import Filtrex.Type.Config
 
   alias Demo.Repo
   alias Demo.Companies.Customer
@@ -21,6 +22,36 @@ defmodule Demo.Companies do
     Repo.all(Customer)
   end
 
+
+
+  def filter_customers(user_filter) do
+    case Filtrex.parse_params(filter_config(:customers), user_filter) do
+      {:ok, filter} ->
+      IO.inspect(filter)
+      IO.inspect(user_filter)
+      Customer |> Filtrex.query(filter) |> Repo.all()
+      {:error, error} -> []
+    end
+  end
+
+  defp filter_config(:customers) do
+    defconfig do
+        text :customerName
+        text :contactLastName
+        text :contactFirstName
+        text :phone
+        text :addressLine1
+        text :addressLine2
+        text :city
+        text :state
+        text :postalCode
+        text :country
+        number :creditLimit, allow_decimal: true
+         #TODO add config for creditLimit of type decimal
+    end
+  end
+
+  #FUNCTIONS TO BE USED WITHOUT FILTREX
   defp base_query do
     from c in Customer
   end
@@ -55,5 +86,6 @@ defmodule Demo.Companies do
     query
     |> where([c], field(c,^String.to_atom(k)) == ^val)
   end
+
 
 end
