@@ -140,7 +140,6 @@ defmodule DemoWeb.TableFilter.Filtrex do
   end
 
   def get_filter_rows(filter) do
-    #Companies.query_table(filter)
     Companies.filter_customers(filter)
   end
 
@@ -174,17 +173,13 @@ defmodule DemoWeb.TableFilter.Filtrex do
     rows = get_rows()
     filter_list = socket.assigns.filter_list
     select = select_list(filter_list,rows)
-    #filter =
-    #  Enum.map(filter_list, fn col -> {col,"All"} end)
-    #  |> Enum.into(%{})
 
     {:noreply, assign(socket, rows: rows, select: select, filter: %{})}
   end
 
 
-  #new version : filter is a map of all the values of the form instead of the last one.
-  #needs to go through all the values and if a value == "All" delete key
-  #only handle_event("form") instead of filter and search.
+  #new version : filter is a map of all the values of the form.
+  #needs to go through all the values and if a value equals "All" ignore it
   #filter -> equals
   #search -> contains , = , >,  ....
   def handle_event(_, filter , socket) do
