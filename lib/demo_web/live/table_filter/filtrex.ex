@@ -1,6 +1,8 @@
 defmodule DemoWeb.TableFilter.Filtrex do
   use Phoenix.LiveView
 
+  import Phoenix.HTML.Form
+
   alias Demo.Companies
 
   def render(assigns) do
@@ -33,18 +35,10 @@ defmodule DemoWeb.TableFilter.Filtrex do
         <%= if (String.to_existing_atom(@show_cols[col])) do %>
           <td style="min-width:70px">
             <%= if (Enum.member?(@filter_list,col)) do %>
-            <%# <form phx-change="filter"> %>
-                <SELECT name="<%= col %>">
-                <%= for value <- Map.get(@select,col) do %>
-                  <OPTION value="<%= value %>" <%= (selected?(@filter,col,value)) %> > <%= value %>
-                <% end %>
-                </SELECT>
-                <%# </form> %>
+              <%= select(:customer, String.to_atom(col),Map.get(@select,col),selected: @filter[col]) %>
             <% end %>
             <%= if (Enum.member?(@search_list,col)) do %>
-            <%#  <form phx-change="search"> %>
-              <input type="text" name="<%= col %>" value="<%= query(@filter,col) %>">
-              <%#  </form> %>
+              <%= text_input :customer, String.to_atom(col), value: query(@filter,col) %>
             <% end %>
           </td>
         <% end %>
@@ -160,7 +154,7 @@ defmodule DemoWeb.TableFilter.Filtrex do
     IO.inspect(select)
 
     {:ok, assign(socket, rows: rows, show_cols: show_cols, cols: cols,
-    filter_list: filter_list, select: select, search_list: search_list, filter: %{} ) }
+    filter_list: filter_list, search_list: search_list, select: select, filter: %{} ) }
   end
 
   def handle_event("show_cols", checked_cols , socket) do
@@ -171,10 +165,13 @@ defmodule DemoWeb.TableFilter.Filtrex do
   #reset filters : each col filter is set to "All"
   def handle_event("reset", _, socket) do
     rows = get_rows()
-    filter_list = socket.assigns.filter_list
-    select = select_list(filter_list,rows)
-
-    {:noreply, assign(socket, rows: rows, select: select, filter: %{})}
+    select =
+      get_filter_list()
+      |> select_list(rows)
+    filter =
+      Enum.map(get_filter_list(), fn c->{c,"All"} end)
+      |> Enum.into(%{})
+    {:noreply, assign(socket, rows: rows, select: select, filter: filter)}
   end
 
 
@@ -185,7 +182,7 @@ defmodule DemoWeb.TableFilter.Filtrex do
   def handle_event(_, filter , socket) do
     IO.inspect(filter)
     new_filter =
-      Enum.map(filter,&rename_key/1)
+      Enum.map(filter["customer"],&rename_key/1)
       |> Enum.reject(fn {_,val} -> val=="All" || val=="" end )
       |> Enum.into(%{})
     IO.inspect(new_filter)
@@ -193,7 +190,7 @@ defmodule DemoWeb.TableFilter.Filtrex do
     case filtered_rows do
       [] -> {:noreply, socket}
       _ ->  select = get_filter_list() |> select_list(filtered_rows)
-            {:noreply, assign(socket, rows: filtered_rows, filter: new_filter, select: select) }
+            {:noreply, assign(socket, rows: filtered_rows, filter: filter["customer"], select: select) }
     end
   end
 
