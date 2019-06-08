@@ -27,6 +27,7 @@ To use your data from your tables:
   * Update the functions in lib/demo_web/live/filtrex.ex:
     * get_filter_list, get_search_list, get_cols
     * get_rows, get_filter_rows
+    * replace form value in the function mount
 
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.

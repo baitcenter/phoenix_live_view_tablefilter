@@ -17,7 +17,7 @@ defmodule DemoWeb.TableFilter.Filtrex do
 
     <center><button phx-click="reset">RESET FILTERS</button></center>
 
-    <form phx-change="table">
+  <form phx-change="table">
   <table>
     <thead>
       <tr>
@@ -35,10 +35,10 @@ defmodule DemoWeb.TableFilter.Filtrex do
         <%= if (String.to_existing_atom(@show_cols[col])) do %>
           <td style="min-width:70px">
             <%= if (Enum.member?(@filter_list,col)) do %>
-              <%= select(:customer, String.to_atom(col),Map.get(@select,col),selected: @filter[col]) %>
+              <%= select(@form, String.to_atom(col),Map.get(@select,col),selected: @filter[col]) %>
             <% end %>
             <%= if (Enum.member?(@search_list,col)) do %>
-              <%= text_input :customer, String.to_atom(col), value: query(@filter,col) %>
+              <%= text_input @form, String.to_atom(col), value: query(@filter,col) %>
             <% end %>
           </td>
         <% end %>
@@ -118,6 +118,7 @@ defmodule DemoWeb.TableFilter.Filtrex do
     ~w(country state city)
   end
 
+  #List of columns to search values (input)
   def get_search_list do
     ~w(customerName phone creditLimit postalCode contactFirstName contactLastName)
   end
@@ -141,20 +142,21 @@ defmodule DemoWeb.TableFilter.Filtrex do
     rows = get_rows()
 
     cols = get_cols()
+    form = :customer
     show_cols = Enum.map(cols, fn {col,_} -> {col,"true"} end) |> Enum.into(%{})
-
-    #filter_list: List of columns to filter with dropdown list
-    filter_list = get_filter_list()
 
     #search_list: List of columns to search values (input)
     search_list = get_search_list()
+
+    #filter_list: List of columns to filter with dropdown list
+    filter_list = get_filter_list()
 
     #select : Map containting for each col of filter_list the list of values from rows
     select = select_list(filter_list,rows)
     IO.inspect(select)
 
-    {:ok, assign(socket, rows: rows, show_cols: show_cols, cols: cols,
-    filter_list: filter_list, search_list: search_list, select: select, filter: %{} ) }
+    {:ok, assign(socket, rows: rows, show_cols: show_cols, cols: cols, form: form,
+              filter_list: filter_list,search_list: search_list,select: select, filter: %{} ) }
   end
 
   def handle_event("show_cols", checked_cols , socket) do
@@ -181,8 +183,9 @@ defmodule DemoWeb.TableFilter.Filtrex do
   #search -> contains , = , >,  ....
   def handle_event(_, filter , socket) do
     IO.inspect(filter)
+    form = Atom.to_string(socket.assigns.form)
     new_filter =
-      Enum.map(filter["customer"],&rename_key/1)
+      Enum.map(filter[form],&rename_key/1)
       |> Enum.reject(fn {_,val} -> val=="All" || val=="" end )
       |> Enum.into(%{})
     IO.inspect(new_filter)
@@ -190,7 +193,7 @@ defmodule DemoWeb.TableFilter.Filtrex do
     case filtered_rows do
       [] -> {:noreply, socket}
       _ ->  select = get_filter_list() |> select_list(filtered_rows)
-            {:noreply, assign(socket, rows: filtered_rows, filter: filter["customer"], select: select) }
+            {:noreply, assign(socket, rows: filtered_rows, filter: filter[form], select: select) }
     end
   end
 
